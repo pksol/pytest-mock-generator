@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pytest-mock-generator"
-version = "0.1.0"
+version = "0.3.0"
 description = "A pytest fixture wrapper for https://pypi.org/project/mock-generator"
 readme = "README.md"
 authors = ["Peter Kogan <kogan.peter@gmail.com>"]
