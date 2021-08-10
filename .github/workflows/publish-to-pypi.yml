@@ -3,8 +3,9 @@ on: push
 
 jobs:
   build-and-publish-test:
-    name: Build and publish python distribution to PyPI
+    name: Build and publish python distribution to test PyPI
     runs-on: ubuntu-18.04
+    if: "!(startsWith(github.event.ref, 'refs/tags') || github.ref == 'refs/heads/master')"
     continue-on-error: true
     steps:
       - name: Checkout Code
@@ -41,7 +42,7 @@ jobs:
           if [ "${INSTALLED:23}" != "$EXPECTED" ]; then exit 1; fi
 
   build-and-publish-production:
-    name: Build and publish python distribution to PyPI
+    name: Build and publish python distribution to production PyPI
     runs-on: ubuntu-18.04
     if: startsWith(github.event.ref, 'refs/tags')
     steps:
