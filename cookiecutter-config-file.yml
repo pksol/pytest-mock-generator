@@ -5,7 +5,7 @@ default_context:
   project_description: "A pytest fixture wrapper for https://pypi.org/project/mock-generator"
   organization: "Peter Kogan"
   license: "MIT"
-  minimal_python_version: 3.6
+  minimal_python_version: 3.7
   github_name: "pksol"
   email: "kogan.peter@gmail.com"
   version: "0.1.0"
