@@ -21,7 +21,7 @@ jobs:
       - name: Sleep to allow pypi index to update with the new version
         run: sleep 5m
       - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2.3.1
         with:
           python-version: 3.7
       - name: Install poetry
@@ -58,7 +58,7 @@ jobs:
       - name: Sleep to allow pypi index to update with the new version
         run: sleep 5m
       - name: Set up Python 3.7
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2.3.1
         with:
           python-version: 3.7
       - name: Install poetry
