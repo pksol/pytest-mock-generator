@@ -42,7 +42,8 @@ def process_and_zip(zip_path, file_name, contents):
     with zipfile.ZipFile(zip_path, 'w') as zip_container:
         zip_container.writestr(file_name, processed_contents)
 ```
-This is the unit under test, or UUT.
+This is the function that you want to test (aka Unit Under Test or UUT). 
+You don't want to create a file on the hard drive and wish to mock it instead.
 
 Although this is a very short function, 
 writing the test code takes a lot of time. It's the fact that the function uses
@@ -50,62 +51,51 @@ a context manager makes the testing more complex than it should be.
 *If you don't believe me, try to manually write mocks and asserts which verify
 that `zip_container.writestr` was called with the right parameters.*
 
-In any case, you start with a test skeleton:
+### Generating the 'Arrange' and 'Assert' sections using Mock Generator
+To generate the 'Arrange' and 'Assert' sections, simply put this code at the beginning of 
+your test function skeleton and run it (make sure to add the `mg` fixture):
 
 ```python
 from tests.sample.code.tested_module import process_and_zip
 
 def test_process_and_zip(mocker, mg):
-    # Arrange: todo  
+    # arrange: todo  
+    mg.generate_uut_mocks_with_asserts(process_and_zip)
     
-    # Act: invoking the tested code
+    # act: invoking the tested code
     process_and_zip('/path/to.zip', 'in_zip.txt', 'foo bar')
     
-    # Assert: todo
+    # assert: todo
 ```
-Now it's time to use Mock Generator instead of manually writing the 'Arrange' 
-and 'Assert' sections.
-
-### Generating the 'Arrange' section
-To generate the 'Arrange' section, simply put this code at the beginning of 
-your test function skeleton and run it (make sure to add the `mg` fixture to 
-your test function):
-```python
-mg.generate_uut_mocks(process_and_zip)
-```
-This will generate the 'Arrange' section for you:
+This will generate the sections for you:
 ```python
 # mocked dependencies
 mock_ZipFile = mocker.MagicMock(name='ZipFile')
 mocker.patch('tests.sample.code.tested_module.zipfile.ZipFile', new=mock_ZipFile)
+# calls to generate_asserts, put this after the 'act'
+mg.generate_asserts(mock_ZipFile, name='mock_ZipFile')
 ```
 <b>The generated code is returned, printed to the console and also copied to the
 clipboard for your convenience. 
-Just paste it (as simple as ctrl+V) at the start of your test function:</b>
+Just paste it (as simple as ctrl+V) to your test function:</b>
 ```python
 from tests.sample.code.tested_module import process_and_zip
 
 def test_process_and_zip(mocker, mg):
+    # arrange:  
     # mocked dependencies
     mock_ZipFile = mocker.MagicMock(name='ZipFile')
     mocker.patch('tests.sample.code.tested_module.zipfile.ZipFile', new=mock_ZipFile)
     
-    # Act: invoking the tested code
+    # act: invoking the tested code
     process_and_zip('/path/to.zip', 'in_zip.txt', 'foo bar')
     
-    # Assert: todo
+    # assert: todo
+    # calls to generate_asserts, put this after the 'act'
+    mg.generate_asserts(mock_ZipFile, name='mock_ZipFile')
 ```
 
-Excellent! Arrange section is ready.
-
-### Generating the Assert section
-Now it's time to add the asserts. Add the following code
-**at the 'Assert'** step:
-```python
-mg.generate_asserts(mock_ZipFile)
-```
-The `mock_ZipFile` is the mock object you generated earlier.
-Now execute the test function to get the assert section: 
+Excellent! Arrange section is ready. Run the test function once more to get the asserts:
 ```python
 assert 1 == mock_ZipFile.call_count
 mock_ZipFile.assert_called_once_with('/path/to.zip', 'w')
@@ -119,7 +109,7 @@ Wow, that's a handful of asserts! Some are very useful:
 * Finally, ensuring that `__enter__` and `__exit__` are called, so there 
 are no open file handles which could cause problems.
 
-You can remove any generated line which you find unnecessary.   
+You can remove any generated lines which you find unnecessary.   
 
 Paste that code right after the act phase, and you're done!
 
@@ -128,13 +118,15 @@ The complete test function:
 from tests.sample.code.tested_module import process_and_zip
 
 def test_process_and_zip(mocker):
+    # arrange:  
     # mocked dependencies
     mock_ZipFile = mocker.MagicMock(name='ZipFile')
     mocker.patch('tests.sample.code.tested_module.zipfile.ZipFile', new=mock_ZipFile)
     
-    # Act: invoking the tested code
+    # act: invoking the tested code
     process_and_zip('/path/to.zip', 'in_zip.txt', 'foo bar')
     
+    # assert:
     assert 1 == mock_ZipFile.call_count
     mock_ZipFile.assert_called_once_with('/path/to.zip', 'w')
     mock_ZipFile.return_value.__enter__.assert_called_once_with()
@@ -145,7 +137,7 @@ Can you imagine the time it would have taken you to code this on your own?
 
 ### What's Next
 #### Asserting Existing Mocks
-At times, you may be editing a test code already containing mocks, or
+At times, you may be editing a test function already containing mocks, or
 you choose to write the mocks yourself, to gain some extra control.
 
 Mock Generator can generate the assert section for standard 
@@ -157,13 +149,31 @@ mg.generate_asserts(mock_obj)
 ```
 Take the generated code and paste it at the 'Assert' section. 
 
-#### Generating the 'Arrange' and 'Assert' sections in one call
-You can make the `generate_uut_mocks_with_asserts` call create the 
-`generate_asserts` code for you (instead of having to call 
-`generate_uut_mocks`):
-```python
-mg.generate_uut_mocks_with_asserts(function_under_test)
+## Troubleshooting
+### No output is printed to the console when running Pytest
+Be sure to run Pytest with appropriate flags to print the output: `pytest -rA`.
+
+### No output is copied to the clipboard
+Mock Generator uses [pyperclip](https://github.com/asweigart/pyperclip) for clipboard 
+manipulations, look for errors / warnings printed to the console, similar to this one: 
+```commandline
+WARNING mock_autogen.utils:utils.py:28 
+Could not copy func results to clipboard Traceback (most recent call last): 
+    File "/home/username/Documents/code/test_mock_gen/.envtest/lib/python3.6/site-packages/mock_autogen/utils.py", line 25, in to_clipboard 
+        pyperclip.copy(result) 
+    File "/home/username/Documents/code/test_mock_gen/.envtest/lib/python3.6/site-packages/pyperclip/__init__.py", line 659, in lazy_load_stub_copy 
+        return copy(text) 
+    File "/home/username/Documents/code/test_mock_gen/.envtest/lib/python3.6/site-packages/pyperclip/__init__.py", line 336, in __call__
+        raise PyperclipException(EXCEPT_MSG) pyperclip.PyperclipException: 
+        
+    Pyperclip could not find a copy/paste mechanism for your system. 
+    For more information, please visit https://pyperclip.readthedocs.io/en/latest/index.html#not-implemented-error
 ```
+
+It's possible that your system lacks some dependency, visit 
+https://pyperclip.readthedocs.io/en/latest/index.html#not-implemented-error for 
+additional troubleshooting steps.
+
 
 ## More information
 Additional documentation can be found in the [mock-generator pypi](https://pypi.org/project/mock-generator).
