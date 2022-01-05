@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "pytest-mock-generator"
-version = "1.1.0"
+version = "1.1.1"
 description = "A pytest fixture wrapper for https://pypi.org/project/mock-generator"
 readme = "README.md"
 authors = ["Peter Kogan <kogan.peter@gmail.com>"]
@@ -45,6 +45,7 @@ pytest_mock_generator = "pytest_mock_generator"
 [tool.poetry.dependencies]
 python = "^3.7"
 importlib_metadata = {version = "^4.5.0", python = "<3.8"}
+#mock-generator = {file = "../mock_autogen/dist/mock_generator-2.3.1-py3-none-any.whl"}  # for dev
 mock-generator = "^2.2.1"
 
 [tool.poetry.dev-dependencies]
