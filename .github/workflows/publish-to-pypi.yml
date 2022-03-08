@@ -10,20 +10,23 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+      - name: Setup pip
+        run: python -m pip install pip==21.0.1
       - name: Build and publish to pypi
         uses: JRubics/poetry-publish@v1.10
         with:
-          python_version: '3.7.1'
+          python_version: '3.8.10'
+          poetry_version: "==1.1.4"
           repository_name: 'pytest_mock_generator'
           repository_url: 'https://test.pypi.org/legacy/'
           pypi_token: ${{ secrets.test_pypi_password }}
         continue-on-error: true
       - name: Sleep to allow pypi index to update with the new version
         run: sleep 5m
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.7
       - name: Install poetry
         run: make poetry-download
       - name: Cleanup
@@ -32,7 +35,6 @@ jobs:
           pip uninstall pytest-mock-generator
       - name: Perform System tests
         run: |
-          python -m pip install pip==21.0.1
           poetry export --dev --without-hashes -f requirements.txt --output test-requirements.txt
           pip install -r test-requirements.txt
           pip install -i https://test.pypi.org/simple/ pytest-mock-generator
@@ -48,19 +50,22 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+      - name: Setup pip
+        run: python -m pip install pip==21.0.1
       - name: Build and publish to pypi
         uses: JRubics/poetry-publish@v1.10
         with:
-          python_version: '3.7.1'
+          python_version: '3.8.10'
+          poetry_version: "==1.1.4"
           repository_name: 'pytest_mock_generator'
           pypi_token: ${{ secrets.prod_pypi_password }}
         continue-on-error: true
       - name: Sleep to allow pypi index to update with the new version
         run: sleep 5m
-      - name: Set up Python 3.7
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.7
       - name: Install poetry
         run: make poetry-download
       - name: Cleanup
@@ -69,7 +74,6 @@ jobs:
           pip uninstall pytest-mock-generator
       - name: Perform System tests
         run: |
-          python -m pip install pip==21.0.1
           poetry export --dev --without-hashes -f requirements.txt --output test-requirements.txt
           pip install -r test-requirements.txt
           pip install pytest-mock-generator
